@@ -551,9 +551,9 @@ def process_folder(input_folder, output_folder):
             img,
             output_size=3084,
             compression_strength=0.3,
-            camera_offset=0.6,
-            panini_weight=0.1,
-            stereo_weight=0.1,
+            camera_offset=0.3,
+            panini_weight=0,
+            stereo_weight=0,
             corner_fill="extend",
             blur_offset=100,
             blur_mode="edge",    # "circle", "edge", "corner"
