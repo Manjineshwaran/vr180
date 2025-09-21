@@ -1,16 +1,21 @@
-
-import zipfile
 import sys
 import os
+from pathlib import Path
 
-zip_path = "spatialmedia.zip"
-extract_dir = "spatialmedia"
-
-if not os.path.exists(extract_dir):
-    with zipfile.ZipFile(zip_path, 'r') as zf:
-        zf.extractall(extract_dir)
-
-sys.path.insert(0, extract_dir)
+# Ensure bundled spatial-media package is importable (Streamlit Cloud friendly)
+# This points to the repo folder `spatial-media/` which contains the `spatialmedia` package
+spatial_media_repo = Path(__file__).parent / "spatial-media"
+if spatial_media_repo.exists():
+    sys.path.insert(0, str(spatial_media_repo))
+    print(f"✅ Added to sys.path: {spatial_media_repo}")
+else:
+    # Fallback: import from a zip archive containing the 'spatialmedia' package at its root
+    spatial_media_zip = Path(__file__).parent / "spatialmedia.zip"
+    if spatial_media_zip.exists():
+        sys.path.insert(0, str(spatial_media_zip))
+        print(f"✅ Added zip to sys.path: {spatial_media_zip}")
+    else:
+        print("⚠️ spatial-media folder or spatialmedia.zip not found; metadata injection may fail.")
 #===============================
 # STEP 1: Video to Frames (memory-safe)
 #===============================
@@ -848,6 +853,7 @@ def process_video_to_vr180(input_video, output_video, fps=18,
     if status_callback:
         status_callback("STEP 7: Injecting VR180 stereo metadata...")
     import subprocess
+
     meta_output = str(Path(output_video).with_name(Path(output_video).stem + "_meta.mp4"))
     # Ensure we can overwrite an existing meta file on repeated runs
     try:
@@ -875,10 +881,11 @@ def process_video_to_vr180(input_video, output_video, fps=18,
 
 # Example usage
 if __name__ == "__main__":
+    
     input_vid = r"D:\AIDS\cv_job_assignment\vr_180_round2\input\inception_short.mp4"
-    output_vid = str((Path(__file__).parent / "output_vr18009.mp4").resolve())
+    output_vid = str((Path(__file__).parent / f"output_compression_strength_04_vr180_{i}.mp4").resolve())
     process_video_to_vr180(input_vid, output_vid, fps=15,
-                            midas_model="MIDAS_SMALL", baseline=15,
-                            vr_output_size=3084, compression_strength=0.3,
-                            camera_offset=0.9, panini_weight=0, stereo_weight=0,
-                            blur_offset=100, blur_mode="edge", blur_strength=50)
+                        midas_model="MIDAS_SMALL", baseline=15,
+                        vr_output_size=2880, compression_strength=0.4,
+                        camera_offset=i, panini_weight=0, stereo_weight=0,
+                        blur_offset=100, blur_mode="edge", blur_strength=50)
