@@ -1,0 +1,43 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+.env/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# App temp/output
+vr180_temp/
+*.mp4
+*.mov
+*.avi
+*.webm
+*.mkv
+
+# Generated frame folders
+frames*/
+depth_maps*/
+stereo_left/
+stereo_right/
+vr180_left/
+vr180_right/
+vr180_stereo/
+
+# Model checkpoints
+checkpoints/
+
+# Misc
+*.log
+debug_mask.jpg
+temp_input_video.mp4
+
+spatial-media/
