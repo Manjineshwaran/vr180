@@ -7,15 +7,15 @@ from pathlib import Path
 spatial_media_repo = Path(__file__).parent / "spatial-media"
 if spatial_media_repo.exists():
     sys.path.insert(0, str(spatial_media_repo))
-    print(f"✅ Added to sys.path: {spatial_media_repo}")
+    print(f"[OK] Added to sys.path: {spatial_media_repo}")
 else:
     # Fallback: import from a zip archive containing the 'spatialmedia' package at its root
     spatial_media_zip = Path(__file__).parent / "spatialmedia.zip"
     if spatial_media_zip.exists():
         sys.path.insert(0, str(spatial_media_zip))
-        print(f"✅ Added zip to sys.path: {spatial_media_zip}")
+        print(f"[OK] Added zip to sys.path: {spatial_media_zip}")
     else:
-        print("⚠️ spatial-media folder or spatialmedia.zip not found; metadata injection may fail.")
+        print("[WARNING] spatial-media folder or spatialmedia.zip not found; metadata injection may fail.")
 #===============================
 # STEP 1: Video to Frames (memory-safe)
 #===============================
@@ -71,8 +71,8 @@ def video_to_frames_folder(video_path, output_dir):
     pipe.stdout.close()
     pipe.wait()
 
-    print(f"✅ Extracted {frame_idx} frames")
-    print(f"📂 Saved to folder: {output_dir}")
+    print(f"[OK] Extracted {frame_idx} frames")
+    print(f"[OK] Saved to folder: {output_dir}")
 
 
 # # Example usage
@@ -287,9 +287,9 @@ class AdvancedMidas:
             # np.save(save_path.replace('.png','_float.npy'), depth_float)
             raw_path = save_path.replace('.png', '_raw.png')
             cv2.imwrite(raw_path, depth_sharpened, [cv2.IMWRITE_PNG_COMPRESSION, 0])
-            print(f"✅ Depth map saved to {save_path}")
-            print(f"✅ Raw depth saved to {raw_path}")
-            print(f"✅ Float depth saved to {save_path.replace('.png','_float.npy')}")
+            print(f"[OK] Depth map saved to {save_path}")
+            print(f"[OK] Raw depth saved to {raw_path}")
+            print(f"[OK] Float depth saved to {save_path.replace('.png','_float.npy')}")
         
         return depth_float, depth_colored
 
@@ -544,7 +544,7 @@ def process_folder(input_folder, output_folder):
         filename = os.path.basename(path)
         img = cv2.imread(path)
         if img is None:
-            print(f"⚠️ Could not read {path}")
+            print(f"[WARN] Could not read {path}")
             continue
         
         vr_img = create_vr180_projection_square(
@@ -561,7 +561,7 @@ def process_folder(input_folder, output_folder):
         )
         
         cv2.imwrite(os.path.join(output_folder, filename), vr_img)
-        print(f"✅ Processed {filename}")
+        print(f"[OK] Processed {filename}")
 
 
 #============================================
@@ -604,12 +604,12 @@ def create_stereo_vr180(left_folder, right_folder, output_folder):
     right_files = sorted([f for f in os.listdir(right_folder) if f.lower().endswith((".png", ".jpg"))])
 
     if len(left_files) != len(right_files):
-        print("⚠️ Warning: Left and right folder have different number of frames!")
+        print("[WARN] Left and right folder have different number of frames!")
 
     for lf, rf in tqdm(zip(left_files, right_files), total=len(left_files), desc="Stitching frames"):
         stitch_frame(lf, rf, left_folder, right_folder, output_folder)
 
-    print(f"✅ Stereo stitching complete! Saved to {output_folder}")
+    print(f"[OK] Stereo stitching complete! Saved to {output_folder}")
 
 
 #============================================
@@ -642,7 +642,7 @@ def frames_to_video_with_audio_safe_ffmpeg(frames_folder, output_video_path, ori
     jpeg_files = sorted(frames_folder.glob("*.jpeg"))
     all_frames = sorted(png_files + jpg_files + jpeg_files)
     if not all_frames:
-        print("⚠️ No frames (*.png/*.jpg/*.jpeg) found to encode.")
+        print("[WARN] No frames (*.png/*.jpg/*.jpeg) found to encode.")
         return
 
     # Prefer numeric sequence pattern if present; else create one (for builds without glob support)
@@ -697,7 +697,7 @@ def frames_to_video_with_audio_safe_ffmpeg(frames_folder, output_video_path, ori
                 temp_seq_dir.rmdir()
             except Exception:
                 pass
-    print(f"✅ Video without audio saved: {temp_video_path}")
+    print(f"[OK] Video without audio saved: {temp_video_path}")
 
     # Check if original video has audio
     cmd_probe = ["ffprobe", "-i", str(original_video_path), "-show_streams", "-select_streams", "a", "-loglevel", "error"]
@@ -718,7 +718,7 @@ def frames_to_video_with_audio_safe_ffmpeg(frames_folder, output_video_path, ori
             str(output_video_path)
         ]
         subprocess.run(cmd_merge, check=True)
-        print(f"✅ Final video with audio saved: {output_video_path}")
+        print(f"[OK] Final video with audio saved: {output_video_path}")
         temp_video_path.unlink()
     else:
         # On Windows, rename will fail if destination exists. Remove existing file first.
@@ -727,12 +727,54 @@ def frames_to_video_with_audio_safe_ffmpeg(frames_folder, output_video_path, ori
         except Exception:
             pass
         temp_video_path.replace(output_video_path)  # atomic replace where supported
-        print(f"⚠️ No audio found. Video saved without audio: {output_video_path}")
+        print(f"[WARN] No audio found. Video saved without audio: {output_video_path}")
 
 #============================================
 #Step 7: inject metadata
 #============================================
 
+
+def inject_vr180_metadata(input_file, output_file, stereo_mode="left-right", projection="fisheye", use_v2=False):
+    """Inject VR180 spatial metadata using the bundled spatialmedia package.
+
+    Works on Streamlit Cloud when only spatialmedia.zip is present by:
+    1) Calling spatialmedia.__main__.main() directly (preferred)
+    2) Falling back to subprocess with sys.executable and PYTHONPATH set
+    """
+    try:
+        # Preferred: in-process call
+        from spatialmedia.__main__ import main as spatialmedia_main
+        args = ["-i"]
+        if use_v2:
+            args.append("--v2")
+        args += [f"--stereo={stereo_mode}", f"--projection={projection}", input_file, output_file]
+        spatialmedia_main(args)
+        print(f"[OK] VR180 video with metadata saved to {output_file}")
+        return True
+    except Exception as e:
+        print(f"[WARN] Programmatic spatialmedia injection failed: {e}")
+        print("[INFO] Falling back to subprocess invocation...")
+        try:
+            env = os.environ.copy()
+            # Ensure the current project path and the spatialmedia.zip are on PYTHONPATH
+            project_dir = str(Path(__file__).parent)
+            zip_path = str((Path(__file__).parent / "spatialmedia.zip").resolve())
+            py_paths = [project_dir]
+            if os.path.exists(zip_path):
+                py_paths.insert(0, zip_path)
+            existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = os.pathsep.join(py_paths + ([existing] if existing else []))
+            cmd = [
+                sys.executable, "-m", "spatialmedia", "-i",
+                f"--stereo={stereo_mode}", f"--projection={projection}",
+                input_file, output_file
+            ]
+            subprocess.run(cmd, check=True, env=env)
+            print(f"[OK] VR180 video with metadata saved to {output_file}")
+            return True
+        except subprocess.CalledProcessError as sub_e:
+            print(f"[WARN] Metadata injection failed with code {sub_e.returncode}. Command: {' '.join(cmd)}")
+            return False
 
 # import subprocess
 
@@ -773,7 +815,7 @@ def process_video_to_vr180(input_video, output_video, fps=18,
     # Create a root temp folder
     root_temp = Path(__file__).parent / "vr180_temp"
     root_temp.mkdir(exist_ok=True)
-    print(f"🌐 Using temp root folder: {root_temp}")
+    print(f"Using temp root folder: {root_temp}")
 
     # Step 1: frames
     frames_folder = root_temp / "frames"
@@ -852,7 +894,6 @@ def process_video_to_vr180(input_video, output_video, fps=18,
     # Step 7: inject metadata
     if status_callback:
         status_callback("STEP 7: Injecting VR180 stereo metadata...")
-    import subprocess
 
     meta_output = str(Path(output_video).with_name(Path(output_video).stem + "_meta.mp4"))
     # Ensure we can overwrite an existing meta file on repeated runs
@@ -860,32 +901,29 @@ def process_video_to_vr180(input_video, output_video, fps=18,
         Path(meta_output).unlink(missing_ok=True)
     except Exception:
         pass
-    cmd = ["python", "-m", "spatialmedia", "-i",
-           "--stereo=left-right", "--projection=fisheye",
-           output_video, meta_output]
-    try:
-        subprocess.run(cmd, check=True)
-        print(f"✅ VR180 video with metadata saved to {meta_output}")
-    except subprocess.CalledProcessError as e:
-        # Provide a clear message and fall back to returning the non-metadata video
-        print(f"⚠️ Metadata injection failed with code {e.returncode}. Returning non-metadata video instead.\nCommand: {' '.join(cmd)}")
+
+    success = inject_vr180_metadata(output_video, meta_output)
+    if not success:
+        # Fall back to returning the non-metadata video if injection failed
         meta_output = output_video
     if progress_callback:
         progress_callback(100)
 
     # Optional: cleanup temp
     shutil.rmtree(root_temp)
-    print("🗑️ Temporary files cleaned up.")
+    print("Temporary files cleaned up.")
 
     return meta_output
 
 # Example usage
 if __name__ == "__main__":
     
-    input_vid = r"D:\AIDS\cv_job_assignment\vr_180_round2\input\inception_short.mp4"
-    output_vid = str((Path(__file__).parent / f"output_compression_strength_04_vr180_{i}.mp4").resolve())
+    input_vid = r"D:\AIDS\vr_180_round2\input\inception_short.mp4"
+    output_vid = str((Path(__file__).parent / "output_compression_strength_04_vr180.mp4").resolve())
     process_video_to_vr180(input_vid, output_vid, fps=15,
                         midas_model="MIDAS_SMALL", baseline=15,
-                        vr_output_size=2880, compression_strength=0.4,
-                        camera_offset=i, panini_weight=0, stereo_weight=0,
-                        blur_offset=100, blur_mode="edge", blur_strength=50)
+                        vr_output_size=1440, compression_strength=0.3,
+                        camera_offset=0, panini_weight=0, stereo_weight=0,
+                        blur_offset=50, blur_mode="edge", blur_strength=50)
+
+
