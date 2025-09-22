@@ -167,7 +167,7 @@ camera_label_map = {
     "Middle back seat mode(note:view little far away to you)": 0.8,
     "Back seat mode(note:view very far away to you)": 1.0
 }
-camera_position = st.selectbox("Select camera position:", options=list(camera_label_map.keys()),index=1)
+camera_position = st.selectbox("Select camera position:", options=list(camera_label_map.keys()),index=0)
 camera_offset = camera_label_map[camera_position]
 
 # ==============================
