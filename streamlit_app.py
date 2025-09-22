@@ -147,7 +147,7 @@ camera_label_map = {
     "Theater front seat mode(note:view close to you)": 0.2,
     "Middle front seat mode(note:view little far away to you)": 0.4,
     "Middle seat mode(note:view little far away to you)": 0.6,
-    "Middle seat mode(note:view little far away to you)": 0.8,
+    "Middle back seat mode(note:view little far away to you)": 0.8,
     "Back seat mode(note:view very far away to you)": 1.0
 }
 camera_position = st.selectbox("Select camera position:", options=list(camera_label_map.keys()),index=1)
