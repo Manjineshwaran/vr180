@@ -113,6 +113,21 @@ with help_col2:
     st.caption("Tip: For faster results, select the lower resolution.")
 
 # ==============================
+# Sample videos (Google Drive)
+# ==============================
+st.subheader("Sample Videos")
+drive_url = "https://drive.google.com/drive/folders/1NMCgjg1uXj-LkJKdU_EfZgX0--G4lwmB?usp=sharing"
+try:
+    # Streamlit 1.25+ provides link_button which opens in a new tab
+    st.link_button("📂 Open sample videos (Google Drive)", drive_url, help="Opens in a new tab")
+except Exception:
+    # Fallback: use HTML anchor to force new tab
+    st.markdown(
+        f'<a href="{drive_url}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:0.5rem 0.75rem;background:#0e86ff;color:#fff;border-radius:6px;text-decoration:none;">📂 Open sample videos (Google Drive)</a>',
+        unsafe_allow_html=True,
+    )
+
+# ==============================
 # Upload input video
 # ==============================
 st.subheader("Upload Your Input Video")

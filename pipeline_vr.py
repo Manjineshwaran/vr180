@@ -474,12 +474,12 @@ def apply_feather_blur(image, mask, blur_strength=15):
 def create_vr180_projection_square(input_image,
                                    output_size=2048,
                                    compression_strength=0.3,
-                                   camera_offset=0.0,
-                                   panini_weight=0.7,
-                                   stereo_weight=0.2,
+                                   camera_offset=0.2,
+                                   panini_weight=0,
+                                   stereo_weight=0,
                                    corner_fill="extend",
                                    blur_offset=3,
-                                   blur_mode="corner",
+                                   blur_mode="edge",
                                    blur_strength=15):
     """
     Full VR180 projection pipeline with Panini/Stereo blend, distortion,
@@ -922,8 +922,8 @@ if __name__ == "__main__":
     output_vid = str((Path(__file__).parent / "output_compression_strength_04_vr180.mp4").resolve())
     process_video_to_vr180(input_vid, output_vid, fps=15,
                         midas_model="MIDAS_SMALL", baseline=15,
-                        vr_output_size=1440, compression_strength=0.3,
+                        vr_output_size=2048, compression_strength=0.3,
                         camera_offset=0, panini_weight=0, stereo_weight=0,
-                        blur_offset=50, blur_mode="edge", blur_strength=50)
+                        blur_offset=100, blur_mode="edge", blur_strength=50)
 
 
