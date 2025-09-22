@@ -137,7 +137,7 @@ uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi
 # Resolution select
 # ==============================
 st.subheader("Resolution Quality")
-resolution = st.radio("Choose resolution:", options=[2880, 3084], index=0)
+resolution = st.radio("Choose resolution:", options=["5760×2880", "7680×3840"], index=0)
 
 # ==============================
 # Camera offset select
