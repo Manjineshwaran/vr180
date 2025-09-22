@@ -137,7 +137,24 @@ uploaded_file = st.file_uploader("Choose a video file", type=["mp4", "mov", "avi
 # Resolution select
 # ==============================
 st.subheader("Resolution Quality")
-resolution = st.radio("Choose resolution:", options=["5760×2880", "7680×3840"], index=0)
+
+# Map labels to numeric values
+resolution_map = {
+    "5760×2880": 2880,
+    "7680×3840": 3840
+}
+
+# Show only the labels in the radio
+resolution_label = st.radio(
+    "Choose resolution:",
+    options=list(resolution_map.keys()),
+    index=0
+)
+
+# Get the numeric value
+resolution = resolution_map[resolution_label]
+# st.subheader("Resolution Quality")
+# resolution = st.radio("Choose resolution:", options=["5760×2880", "7680×3840"], index=0)
 
 # ==============================
 # Camera offset select
