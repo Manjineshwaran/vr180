@@ -46,7 +46,7 @@ def set_background_image(image_file):
         unsafe_allow_html=True
     )
 
-dummy_bg = "background.jpeg"
+dummy_bg = "OIP.webp"
 if Path(dummy_bg).exists():
     set_background_image(dummy_bg)
 else:
