@@ -21,7 +21,7 @@ import base64
 # ==============================
 # Page config
 # ==============================
-st.set_page_config(page_title="VR180 Video Converter", layout="wide")
+st.set_page_config(page_title="VR180 PALACE", layout="wide")
 
 # ==============================
 # Background CSS
