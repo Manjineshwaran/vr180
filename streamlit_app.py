@@ -21,7 +21,7 @@ import base64
 # ==============================
 # Page config
 # ==============================
-st.set_page_config(page_title="VR180 PALACE", layout="wide")
+st.set_page_config(page_title="PALACE STUDIO", layout="wide")
 
 # ==============================
 # Background CSS
@@ -55,7 +55,7 @@ else:
 # ==============================
 # Title
 # ==============================
-st.title("🎬 VR180 Video Converter")
+st.title("🎬 VR180 PALACE")
 
 # Notes/Help popup and Error dialog helpers
 # Use Streamlit dialogs when available; otherwise, fall back to inline messages
